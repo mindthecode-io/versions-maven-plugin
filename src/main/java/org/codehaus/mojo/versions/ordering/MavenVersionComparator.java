@@ -72,6 +72,7 @@ public class MavenVersionComparator
         {
             // the version has parts and was not parsed successfully
             // have to have one segment
+        	// This happens on '1.2.3.4' and '[1.2,]'
             return version.equals( v.getQualifier() ) ? 1 : 3;
         }
         if ( StringUtils.isEmpty( version ) )

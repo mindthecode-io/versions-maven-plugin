@@ -1,5 +1,13 @@
 package org.codehaus.mojo.versions;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.xml.stream.XMLStreamException;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -35,14 +43,6 @@ import org.codehaus.mojo.versions.api.ArtifactVersions;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.ordering.MajorMinorIncrementalFilter;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Replaces any release versions with the latest release version.
@@ -156,7 +156,14 @@ public class UseLatestReleasesMojo
 
                 getLog().debug( "Looking for newer versions of " + toString( dep ) );
                 ArtifactVersions versions = getHelper().lookupArtifactVersions( artifact, false );
-                ArtifactVersion[] newer = versions.getNewerVersions( version, segment, false );
+                ArtifactVersion[] newer;
+                try {
+                	newer = versions.getNewerVersions( version, segment, false );
+                } catch (RuntimeException e) {
+                	// Workaround https://github.com/mojohaus/versions-maven-plugin/issues/251
+                	getLog().warn("Issue with artifact: " + artifact);
+                	newer = new ArtifactVersion[0];
+                }
                 newer = filterVersionsWithIncludes( newer, artifact );
 
                 ArtifactVersion[] filteredVersions = majorMinorIncfilter.filter( selectedVersion, newer );

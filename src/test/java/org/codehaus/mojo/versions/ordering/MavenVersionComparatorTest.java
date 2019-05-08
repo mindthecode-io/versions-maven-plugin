@@ -1,5 +1,7 @@
 package org.codehaus.mojo.versions.ordering;
 
+import static org.junit.Assert.assertEquals;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -20,9 +22,8 @@ package org.codehaus.mojo.versions.ordering;
  */
 
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.junit.Ignore;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 public class MavenVersionComparatorTest
 {
@@ -56,6 +57,18 @@ public class MavenVersionComparatorTest
         assertIncrement( "1.0-alpha-90-SNAPSHOT", "1.0-alpha-9-SNAPSHOT", 3 );
         assertIncrement( "1.0-za-SNAPSHOT", "1.0-z-SNAPSHOT", 3 );
         assertIncrement( "1.0-z90-SNAPSHOT", "1.0-z9-SNAPSHOT", 3 );
+    }
+    
+    @Ignore
+    @Test
+    public void testSegmentIncrementing_Failing()
+        throws Exception
+    {
+        // https://github.com/mojohaus/versions-maven-plugin/issues/251
+        assertIncrement( "17.1", "2.2.38.141", 3 );
+        assertIncrement( "17.1", "v3-rev126-1.19.1", 3 );
+        assertIncrement( "17.1", "17.0", 1 );
+        assertIncrement( "17.1", "[17.0,]", 1 );
     }
 
     private void assertIncrement( String expected, String initial, int segment )

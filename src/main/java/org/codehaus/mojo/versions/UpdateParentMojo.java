@@ -1,5 +1,7 @@
 package org.codehaus.mojo.versions;
 
+import javax.xml.stream.XMLStreamException;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,6 +24,7 @@ package org.codehaus.mojo.versions;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.metadata.ArtifactMetadataRetrievalException;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.artifact.versioning.VersionRange;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -30,8 +33,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.mojo.versions.api.PomHelper;
 import org.codehaus.mojo.versions.rewriting.ModifiedPomXMLEventReader;
-
-import javax.xml.stream.XMLStreamException;
 
 /**
  * Sets the parent version to the latest parent version.
@@ -110,6 +111,12 @@ public class UpdateParentMojo
         {
             throw new MojoExecutionException( e.getMessage(), e );
         }
+        
+		if (getHelper().getVersionComparator(artifact)
+				.compare(new DefaultArtifactVersion(currentVersion), artifactVersion) > 0) {
+	        getLog().warn( "Not changing versions " + currentVersion + " to seemingly latest " + artifactVersion.toString() );
+	        return;
+		}
 
         if ( !shouldApplyUpdate( artifact, currentVersion, artifactVersion ) )
         {
